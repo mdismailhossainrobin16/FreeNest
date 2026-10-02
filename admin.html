@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#E3E8F0" />
+<title>Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- soft UI surface + light/shadow pair ---- */
+    --bg:#E3E8F0;
+    --sh-l:rgba(255,255,255,0.95);
+    --sh-d:rgba(143,158,185,0.55);
+
+    --raised:    9px 9px 20px var(--sh-d), -9px -9px 20px var(--sh-l);
+    --raised-md: 6px 6px 14px var(--sh-d), -6px -6px 14px var(--sh-l);
+    --raised-sm: 4px 4px 9px var(--sh-d), -4px -4px 9px var(--sh-l);
+    --raised-xs: 3px 3px 6px var(--sh-d), -3px -3px 6px var(--sh-l);
+    --inset-sm:  inset 3px 3px 7px var(--sh-d), inset -3px -3px 7px var(--sh-l);
+    --inset-xs:  inset 2px 2px 4px var(--sh-d), inset -2px -2px 4px var(--sh-l);
+
+    --accent-a:#7C5CFC; --accent-b:#22D3C6; --danger:#B3363F; --warn:#FFB86B;
+    --text-0:#2B3350; --text-1:#566079; --text-2:#6F7894;
+    --on-accent:#0F1424;
+    --radius-lg:26px; --radius-md:14px; --radius-pill:999px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:var(--bg);
+    color:var(--text-0); font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{ font-family:'Sora',system-ui,sans-serif; }
+  input,textarea,select,button{ font-family:inherit; }
+
+  /* ---------- login screen ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:28px;
+  }
+  .login-card{
+    width:100%; max-width:380px; background:var(--bg);
+    border-radius:var(--radius-lg); padding:34px 28px;
+    box-shadow:var(--raised);
+  }
+  .login-card h1{ font-size:20px; margin:0 0 4px; }
+  .login-card p.sub{ color:var(--text-2); font-size:13px; margin:0 0 24px; }
+  .field{ margin-bottom:16px; }
+  label{ display:block; font-size:12.5px; font-weight:500; color:var(--text-1); margin-bottom:8px; }
+  input[type=text], input[type=email], input[type=password], input[type=number], input[type=url], textarea, select{
+    width:100%; padding:12px 16px; border-radius:var(--radius-md);
+    background:var(--bg); border:none; color:var(--text-0);
+    box-shadow:var(--inset-sm);
+    font-size:14px; outline:none; transition:box-shadow .2s ease;
+  }
+  input::placeholder, textarea::placeholder{ color:var(--text-2); opacity:.8; }
+  textarea{ resize:vertical; min-height:80px; }
+  input:focus, textarea:focus, select:focus{ box-shadow:var(--inset-sm), 0 0 0 2px var(--accent-b); }
+  select{
+    appearance:none; -webkit-appearance:none; padding-right:40px; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236F7894' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 20px; border-radius:var(--radius-pill); border:none; cursor:pointer;
+    background:var(--bg); color:var(--text-0);
+    box-shadow:var(--raised-sm);
+    font-weight:600; font-size:13.5px; transition:box-shadow .2s ease, filter .2s ease, color .2s ease;
+  }
+  .btn:hover{ box-shadow:6px 6px 13px var(--sh-d), -6px -6px 13px var(--sh-l); }
+  .btn:active{ box-shadow:var(--inset-sm); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+  .btn-primary{ background:linear-gradient(120deg, var(--accent-a), var(--accent-b)); color:var(--on-accent); width:100%; box-shadow:var(--raised-md); }
+  .btn-primary:hover{ filter:brightness(1.05); box-shadow:var(--raised-md); }
+  .btn-primary:active{ box-shadow:inset 3px 3px 8px rgba(0,0,0,.28), inset -3px -3px 8px rgba(255,255,255,.3); }
+  .btn-ghost{ background:var(--bg); color:var(--text-0); }
+  .btn-danger{ background:var(--bg); color:var(--danger); }
+  .btn-icon{ width:36px; height:36px; padding:0; border-radius:12px; box-shadow:var(--raised-xs); }
+  .btn-icon:hover{ box-shadow:var(--raised-xs); color:var(--accent-a); }
+  .btn-icon.btn-danger:hover{ color:var(--danger); }
+  .btn-icon:active{ box-shadow:var(--inset-xs); }
+  .btn-sm{ padding:9px 15px; font-size:12.5px; }
+
+  #loginError{ color:var(--danger); font-size:12.5px; margin-top:12px; min-height:16px; }
+
+  /* ---------- dashboard shell ---------- */
+  #dashboard{ display:none; }
+  header.topbar{
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; background:var(--bg);
+    box-shadow:0 8px 16px -8px var(--sh-d);
+  }
+  header.topbar h1{ font-size:16px; margin:0; }
+  .container{ max-width:760px; margin:0 auto; padding:10px 22px 90px; }
+
+  nav.tabs{
+    display:flex; gap:14px; overflow-x:auto; padding:18px 24px 20px; max-width:760px; margin:0 auto;
+    scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  .tab-btn{
+    flex:none; padding:10px 18px; border-radius:var(--radius-pill); border:none;
+    background:var(--bg); color:var(--text-1); font-size:13px; font-weight:600; cursor:pointer;
+    box-shadow:var(--raised-sm);
+    transition:box-shadow .2s ease, color .2s ease;
+  }
+  .tab-btn:hover{ color:var(--text-0); }
+  .tab-btn.active{ box-shadow:var(--inset-sm); color:color-mix(in srgb, var(--accent-a) 70%, var(--on-accent)); }
+
+  .panel{ display:none; animation:fade .25s ease; }
+  .panel.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  .card{
+    background:var(--bg); border-radius:var(--radius-lg);
+    padding:22px; margin-bottom:26px;
+    box-shadow:var(--raised);
+  }
+  .card h2{ font-size:15px; margin:0 0 16px; }
+  .card h3{ font-size:13.5px; margin:0 0 12px; color:var(--text-1); font-weight:600; }
+  .row{ display:flex; gap:12px; }
+  .row > *{ flex:1; }
+  .hint{ font-size:12px; color:var(--text-2); margin-top:8px; line-height:1.5; }
+
+  .avatar-preview{
+    width:68px; height:68px; border-radius:50%; background:var(--bg) center/cover no-repeat;
+    box-shadow:var(--inset-sm); flex:none;
+  }
+  .preview-row{ display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+
+  .list-item{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:18px;
+    background:var(--bg); box-shadow:var(--inset-sm); margin-bottom:14px;
+  }
+  .list-item .thumb{
+    width:42px; height:42px; border-radius:13px; background:var(--bg) center/cover no-repeat; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--text-1); font-weight:700;
+    box-shadow:var(--raised-xs);
+  }
+  .list-item .meta{ min-width:0; flex:1; }
+  .list-item .meta strong{ display:block; font-size:13.5px; }
+  .list-item .meta span{ display:block; font-size:11.5px; color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .list-item .actions{ display:flex; gap:8px; flex:none; }
+  .list-item .meta strong{ overflow-wrap:anywhere; }
+  @media (max-width:520px){
+    .list-item{ flex-wrap:wrap; row-gap:12px; }
+    .list-item .meta{ flex:1 1 calc(100% - 56px); }
+    .list-item .switch{ margin-right:auto; }
+  }
+
+  .switch{ position:relative; width:48px; height:26px; flex:none; margin:0; }
+  .switch input{ opacity:0; width:0; height:0; position:absolute; }
+  .switch .track{
+    position:absolute; inset:0; background:var(--bg); border-radius:var(--radius-pill);
+    box-shadow:var(--inset-sm);
+    transition:background .2s ease, box-shadow .2s ease; cursor:pointer;
+  }
+  .switch .track::before{
+    content:""; position:absolute; width:20px; height:20px; left:3px; top:3px; border-radius:50%;
+    background:var(--bg); box-shadow:var(--raised-xs); transition:transform .2s ease, background .2s ease;
+  }
+  .switch input:checked + .track{
+    background:linear-gradient(120deg, var(--accent-a), var(--accent-b));
+    box-shadow:inset 2px 2px 5px rgba(0,0,0,.25), inset -2px -2px 5px rgba(255,255,255,.3);
+  }
+  .switch input:checked + .track::before{ transform:translateX(22px); background:#F4F7FB; box-shadow:2px 2px 5px rgba(0,0,0,.28); }
+  .switch input:focus-visible + .track{ outline:2px solid var(--accent-a); outline-offset:3px; }
+
+  .color-row{ display:flex; gap:14px; }
+  .swatch-field{ flex:1; }
+  .swatch-field input[type=color]{
+    width:100%; height:46px; border-radius:var(--radius-md); border:none;
+    background:var(--bg); box-shadow:var(--inset-sm); padding:6px; cursor:pointer;
+  }
+  .swatch-field input[type=color]::-webkit-color-swatch-wrapper{ padding:0; }
+  .swatch-field input[type=color]::-webkit-color-swatch{ border:none; border-radius:9px; }
+  .swatch-field input[type=color]::-moz-color-swatch{ border:none; border-radius:9px; }
+
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translate(-50%, 20px);
+    background:var(--bg); color:var(--text-0);
+    padding:13px 22px; border-radius:var(--radius-pill); font-size:13px; font-weight:600;
+    opacity:0; pointer-events:none; transition:all .25s ease; z-index:50; box-shadow:var(--raised-md);
+  }
+  .toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast.err{ color:var(--danger); }
+
+  .empty-note{ text-align:center; color:var(--text-2); font-size:13px; padding:16px; }
+
+  :focus-visible{ outline:2px solid var(--accent-a); outline-offset:3px; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible{ outline:none; }
+
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(143,158,185,0.5); border-radius:8px; }
+</style>
+</head>
+<body>
+
+<!-- ============= LOGIN ============= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Admin Login</h1>
+    <p class="sub">Sign in to manage your bio link page</p>
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="loginBtn" style="width:100%;">Log in</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+
+<!-- ============= DASHBOARD ============= -->
+<div id="dashboard">
+  <header class="topbar">
+    <h1>Admin Panel</h1>
+    <button class="btn btn-ghost btn-sm" id="logoutBtn">Log out</button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="profile">Profile</button>
+    <button class="tab-btn" data-tab="links">Social links</button>
+    <button class="tab-btn" data-tab="apps">Apps</button>
+    <button class="tab-btn" data-tab="appearance">Appearance</button>
+  </nav>
+
+  <div class="container">
+
+    <!-- ---------- PROFILE PANEL ---------- -->
+    <section class="panel active" id="panel-profile">
+      <div class="card">
+        <h2>Profile</h2>
+        <div class="preview-row">
+          <div class="avatar-preview" id="avatarPreview"></div>
+          <div style="flex:1;">
+            <label for="avatarUrl">Profile picture URL</label>
+            <input type="url" id="avatarUrl" placeholder="https://…/photo.jpg">
+          </div>
+        </div>
+        <div class="field">
+          <label for="pName">Name</label>
+          <input type="text" id="pName" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label for="pBio">Short bio</label>
+          <textarea id="pBio" placeholder="A short line about you"></textarea>
+        </div>
+        <button class="btn btn-primary" id="saveProfileBtn">Save profile</button>
+      </div>
+    </section>
+
+    <!-- ---------- LINKS PANEL ---------- -->
+    <section class="panel" id="panel-links">
+      <div class="card">
+        <h2>Add a social link</h2>
+        <div class="row">
+          <div class="field">
+            <label for="lPlatform">Platform</label>
+            <select id="lPlatform">
+              <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
+              <option value="tiktok">TikTok</option>
+              <option value="youtube">YouTube</option>
+              <option value="telegram">Telegram</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="custom">Custom / other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="lLabel">Label (for custom)</label>
+            <input type="text" id="lLabel" placeholder="e.g. Portfolio">
+          </div>
+        </div>
+        <div class="field">
+          <label for="lUrl">URL</label>
+          <input type="url" id="lUrl" placeholder="https://…">
+        </div>
+        <div class="field">
+          <label for="lIcon">Custom icon URL (optional)</label>
+          <input type="url" id="lIcon" placeholder="https://…/icon.png">
+          <div class="hint">Leave empty to use the built-in icon for the selected platform.</div>
+        </div>
+        <button class="btn btn-primary" id="addLinkBtn">Add link</button>
+      </div>
+
+      <div class="card">
+        <h3>Existing links</h3>
+        <div id="linksList"></div>
+      </div>
+    </section>
+
+    <!-- ---------- APPS PANEL ---------- -->
+    <section class="panel" id="panel-apps">
+      <div class="card">
+        <h2 id="appFormTitle">Add an app</h2>
+        <div class="field">
+          <label for="aName">App name</label>
+          <input type="text" id="aName" placeholder="My App">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="aVersion">Version</label>
+            <input type="text" id="aVersion" placeholder="1.0.0">
+          </div>
+          <div class="field">
+            <label for="aIcon">App icon URL</label>
+            <input type="url" id="aIcon" placeholder="https://…/icon.png">
+          </div>
+        </div>
+        <div class="field">
+          <label for="aDesc">Short description</label>
+          <textarea id="aDesc" placeholder="What this app does"></textarea>
+        </div>
+        <div class="field">
+          <label for="aShot">Screenshot URL (optional)</label>
+          <input type="url" id="aShot" placeholder="https://…/screenshot.png">
+        </div>
+        <div class="field">
+          <label for="aDownload">Download URL</label>
+          <input type="url" id="aDownload" placeholder="https://…/app.apk">
+        </div>
+        <div class="row">
+          <button class="btn btn-primary" id="addAppBtn">Add app</button>
+          <button class="btn btn-ghost" id="cancelAppEditBtn" style="display:none;">Cancel edit</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Existing apps</h3>
+        <div id="appsList"></div>
+      </div>
+    </section>
+
+    <!-- ---------- APPEARANCE PANEL ---------- -->
+    <section class="panel" id="panel-appearance">
+      <div class="card">
+        <h2>Background</h2>
+        <div class="field">
+          <label for="bgType">Background type</label>
+          <select id="bgType">
+            <option value="gradient">Soft surface (default)</option>
+            <option value="image">Background image</option>
+          </select>
+          <div class="hint">Soft surface keeps the clean neumorphic look. Choose Background image to place your own picture behind the page.</div>
+        </div>
+        <div class="field" id="bgImageField" style="display:none;">
+          <label for="bgImageUrl">Background image URL</label>
+          <input type="url" id="bgImageUrl" placeholder="https://…/bg.jpg">
+        </div>
+        <h3>Gradient colors</h3>
+        <div class="color-row">
+          <div class="swatch-field"><label>Color 1</label><input type="color" id="color1" value="#7C5CFC"></div>
+          <div class="swatch-field"><label>Color 2</label><input type="color" id="color2" value="#22D3C6"></div>
+          <div class="swatch-field"><label>Color 3</label><input type="color" id="color3" value="#FFB86B"></div>
+        </div>
+        <div class="hint">Used for icons, buttons and highlights on your page.</div>
+        <button class="btn btn-primary" id="saveAppearanceBtn" style="margin-top:22px;">Save appearance</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // ======================================================================
+  // PASTE YOUR FIREBASE CONFIG HERE (same project as index.html)
+  // ======================================================================
+  const firebaseConfig = {
+  apiKey: "AIzaSyDKBSwz4gpK_a22C48LFupIIPTkPF0BvL8",
+  authDomain: "my-link-7b5df.firebaseapp.com",
+  databaseURL: "https://my-link-7b5df-default-rtdb.firebaseio.com",
+  projectId: "my-link-7b5df",
+  storageBucket: "my-link-7b5df.firebasestorage.app",
+  messagingSenderId: "367902503094",
+  appId: "1:367902503094:web:77f7c1b13ce4d366aab617",
+  measurementId: "G-XVSLBKYT2Z"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
+  function toast(msg, isErr){
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.toggle("err", !!isErr);
+    t.classList.add("show");
+    clearTimeout(toast._h);
+    toast._h = setTimeout(()=>t.classList.remove("show"), 2600);
+  }
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ---------- auth ----------
+  $("loginBtn").addEventListener("click", async () => {
+    const email = $("email").value.trim();
+    const pass = $("password").value;
+    $("loginError").textContent = "";
+    if(!email || !pass){ $("loginError").textContent = "Enter email and password."; return; }
+    try{
+      await signInWithEmailAndPassword(auth, email, pass);
+    }catch(e){
+      $("loginError").textContent = "Login failed. Check your email and password.";
+    }
+  });
+  $("password").addEventListener("keydown", e => { if(e.key === "Enter") $("loginBtn").click(); });
+
+  $("logoutBtn").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, user => {
+    if(user){
+      $("loginScreen").style.display = "none";
+      $("dashboard").style.display = "block";
+      loadProfile();
+      loadLinks();
+      loadApps();
+    } else {
+      $("loginScreen").style.display = "flex";
+      $("dashboard").style.display = "none";
+    }
+  });
+
+  // ---------- tabs ----------
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      $("panel-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---------- profile ----------
+  async function loadProfile(){
+    const snap = await getDoc(doc(db, "profile", "main"));
+    const p = snap.exists() ? snap.data() : {};
+    $("pName").value = p.name || "";
+    $("pBio").value = p.bio || "";
+    $("avatarUrl").value = p.avatarUrl || "";
+    updateAvatarPreview();
+
+    $("bgType").value = p.backgroundType === "image" ? "image" : "gradient";
+    $("bgImageUrl").value = p.bgImageUrl || "";
+    $("bgImageField").style.display = $("bgType").value === "image" ? "block" : "none";
+    const colors = Array.isArray(p.gradientColors) && p.gradientColors.length ? p.gradientColors : ["#7C5CFC","#22D3C6","#FFB86B"];
+    $("color1").value = colors[0] || "#7C5CFC";
+    $("color2").value = colors[1] || "#22D3C6";
+    $("color3").value = colors[2] || "#FFB86B";
+  }
+  function updateAvatarPreview(){
+    const url = $("avatarUrl").value.trim();
+    $("avatarPreview").style.backgroundImage = url ? `url(${JSON.stringify(url).slice(1,-1)})` : "none";
+  }
+  $("avatarUrl").addEventListener("input", updateAvatarPreview);
+
+  $("saveProfileBtn").addEventListener("click", async () => {
+    try{
+      await setDoc(doc(db, "profile", "main"), {
+        name: $("pName").value.trim(),
+        bio: $("pBio").value.trim(),
+        avatarUrl: $("avatarUrl").value.trim()
+      }, { merge: true });
+      toast("Profile saved");
+    }catch(e){ toast("Could not save profile", true); console.error(e); }
+  });
+
+  // ---------- appearance ----------
+  $("bgType").addEventListener("change", () => {
+    $("bgImageField").style.display = $("bgType").value === "image" ? "block" : "none";
+  });
+  $("saveAppearanceBtn").addEventListener("click", async () => {
+    try{
+      await setDoc(doc(db, "profile", "main"), {
+        backgroundType: $("bgType").value,
+        bgImageUrl: $("bgImageUrl").value.trim(),
+        gradientColors: [$("color1").value, $("color2").value, $("color3").value]
+      }, { merge: true });
+      toast("Appearance saved");
+    }catch(e){ toast("Could not save appearance", true); console.error(e); }
+  });
+
+  // ---------- social links ----------
+  async function loadLinks(){
+    const list = $("linksList");
+    list.innerHTML = `<div class="empty-note">Loading…</div>`;
+    const q = query(collection(db, "links"), orderBy("order", "asc"));
+    const snap = await getDocs(q);
+    const items = [];
+    snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+    if(items.length === 0){ list.innerHTML = `<div class="empty-note">No links yet.</div>`; return; }
+
+    list.innerHTML = items.map((l, i) => `
+      <div class="list-item" data-id="${l.id}">
+        <div class="thumb">${(l.platform||"?").slice(0,2).toUpperCase()}</div>
+        <div class="meta">
+          <strong>${esc(l.label || l.platform)}</strong>
+          <span>${esc(l.url)}</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" class="link-toggle" ${l.enabled !== false ? "checked" : ""}>
+          <span class="track"></span>
+        </label>
+        <div class="actions">
+          <button class="btn btn-icon btn-ghost link-up" title="Move up" ${i===0 ? "disabled" : ""}>↑</button>
+          <button class="btn btn-icon btn-ghost link-down" title="Move down" ${i===items.length-1 ? "disabled" : ""}>↓</button>
+          <button class="btn btn-icon btn-danger link-del" title="Delete">✕</button>
+        </div>
+      </div>
+    `).join("");
+
+    list.querySelectorAll(".list-item").forEach((row, i) => {
+      const id = row.dataset.id;
+      row.querySelector(".link-toggle").addEventListener("change", async e => {
+        await updateDoc(doc(db, "links", id), { enabled: e.target.checked });
+        toast(e.target.checked ? "Link enabled" : "Link disabled");
+      });
+      row.querySelector(".link-del").addEventListener("click", async () => {
+        if(!confirm("Delete this link?")) return;
+        await deleteDoc(doc(db, "links", id));
+        toast("Link deleted");
+        loadLinks();
+      });
+      row.querySelector(".link-up").addEventListener("click", () => swapOrder("links", items, i, i-1, loadLinks));
+      row.querySelector(".link-down").addEventListener("click", () => swapOrder("links", items, i, i+1, loadLinks));
+    });
+  }
+
+  $("addLinkBtn").addEventListener("click", async () => {
+    const platform = $("lPlatform").value;
+    const url = $("lUrl").value.trim();
+    const label = $("lLabel").value.trim();
+    const iconUrl = $("lIcon").value.trim();
+    if(!url){ toast("Enter a URL", true); return; }
+    try{
+      const q = query(collection(db, "links"), orderBy("order", "asc"));
+      const snap = await getDocs(q);
+      const nextOrder = snap.size;
+      await addDoc(collection(db, "links"), {
+        platform, url, label: label || platform, iconUrl, enabled: true, order: nextOrder
+      });
+      $("lUrl").value = ""; $("lLabel").value = ""; $("lIcon").value = "";
+      toast("Link added");
+      loadLinks();
+    }catch(e){ toast("Could not add link", true); console.error(e); }
+  });
+
+  // ---------- apps ----------
+  let editingAppId = null;
+
+  async function loadApps(){
+    const list = $("appsList");
+    list.innerHTML = `<div class="empty-note">Loading…</div>`;
+    const q = query(collection(db, "apps"), orderBy("order", "asc"));
+    const snap = await getDocs(q);
+    const items = [];
+    snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+    if(items.length === 0){ list.innerHTML = `<div class="empty-note">No apps yet.</div>`; return; }
+
+    list.innerHTML = items.map((a, i) => `
+      <div class="list-item" data-id="${a.id}">
+        <div class="thumb" ${a.iconUrl ? `style="background-image:url(${JSON.stringify(a.iconUrl).slice(1,-1)})"` : ""}>
+          ${a.iconUrl ? "" : (a.name||"?").slice(0,2).toUpperCase()}
+        </div>
+        <div class="meta">
+          <strong>${esc(a.name)} ${a.version ? `· v${esc(a.version)}` : ""}</strong>
+          <span>${esc(a.downloadUrl)}</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" class="app-toggle" ${a.enabled !== false ? "checked" : ""}>
+          <span class="track"></span>
+        </label>
+        <div class="actions">
+          <button class="btn btn-icon btn-ghost app-up" title="Move up" ${i===0 ? "disabled" : ""}>↑</button>
+          <button class="btn btn-icon btn-ghost app-down" title="Move down" ${i===items.length-1 ? "disabled" : ""}>↓</button>
+          <button class="btn btn-icon btn-ghost app-edit" title="Edit">✎</button>
+          <button class="btn btn-icon btn-danger app-del" title="Delete">✕</button>
+        </div>
+      </div>
+    `).join("");
+
+    list.querySelectorAll(".list-item").forEach((row, i) => {
+      const id = row.dataset.id;
+      const a = items[i];
+      row.querySelector(".app-toggle").addEventListener("change", async e => {
+        await updateDoc(doc(db, "apps", id), { enabled: e.target.checked });
+        toast(e.target.checked ? "App enabled" : "App disabled");
+      });
+      row.querySelector(".app-del").addEventListener("click", async () => {
+        if(!confirm("Delete this app?")) return;
+        await deleteDoc(doc(db, "apps", id));
+        toast("App deleted");
+        loadApps();
+      });
+      row.querySelector(".app-edit").addEventListener("click", () => startEditApp(a));
+      row.querySelector(".app-up").addEventListener("click", () => swapOrder("apps", items, i, i-1, loadApps));
+      row.querySelector(".app-down").addEventListener("click", () => swapOrder("apps", items, i, i+1, loadApps));
+    });
+  }
+
+  function startEditApp(a){
+    editingAppId = a.id;
+    $("aName").value = a.name || "";
+    $("aVersion").value = a.version || "";
+    $("aIcon").value = a.iconUrl || "";
+    $("aDesc").value = a.description || "";
+    $("aShot").value = a.screenshotUrl || "";
+    $("aDownload").value = a.downloadUrl || "";
+    $("appFormTitle").textContent = "Edit app";
+    $("addAppBtn").textContent = "Save changes";
+    $("cancelAppEditBtn").style.display = "inline-flex";
+    document.querySelector('[data-tab="apps"]').click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function resetAppForm(){
+    editingAppId = null;
+    ["aName","aVersion","aIcon","aDesc","aShot","aDownload"].forEach(id => $(id).value = "");
+    $("appFormTitle").textContent = "Add an app";
+    $("addAppBtn").textContent = "Add app";
+    $("cancelAppEditBtn").style.display = "none";
+  }
+  $("cancelAppEditBtn").addEventListener("click", resetAppForm);
+
+  $("addAppBtn").addEventListener("click", async () => {
+    const name = $("aName").value.trim();
+    const downloadUrl = $("aDownload").value.trim();
+    if(!name || !downloadUrl){ toast("Enter app name and download URL", true); return; }
+    const data = {
+      name,
+      version: $("aVersion").value.trim(),
+      iconUrl: $("aIcon").value.trim(),
+      description: $("aDesc").value.trim(),
+      screenshotUrl: $("aShot").value.trim(),
+      downloadUrl
+    };
+    try{
+      if(editingAppId){
+        await updateDoc(doc(db, "apps", editingAppId), data);
+        toast("App updated");
+      } else {
+        const q = query(collection(db, "apps"), orderBy("order", "asc"));
+        const snap = await getDocs(q);
+        await addDoc(collection(db, "apps"), { ...data, enabled: true, order: snap.size });
+        toast("App added");
+      }
+      resetAppForm();
+      loadApps();
+    }catch(e){ toast("Could not save app", true); console.error(e); }
+  });
+
+  // ---------- shared: reorder ----------
+  async function swapOrder(col, items, i, j, reload){
+    if(j < 0 || j >= items.length) return;
+    const a = items[i], b = items[j];
+    try{
+      await updateDoc(doc(db, col, a.id), { order: j });
+      await updateDoc(doc(db, col, b.id), { order: i });
+      reload();
+    }catch(e){ toast("Could not reorder", true); console.error(e); }
+  }
+</script>
+</body>
+</html>
